@@ -35,6 +35,15 @@ class AnalyzeCropView(APIView):
             # Perform disease prediction
             result = predict_disease(image_path)
 
+            # Check if result contains an error
+            if "error" in result:
+                # Delete the analysis entry if prediction failed
+                analysis.delete()
+                return Response(
+                    {"error": "Image analysis failed. Please try with a different image."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             # Save the result
             analysis.result = result
             analysis.save()
@@ -45,8 +54,13 @@ class AnalyzeCropView(APIView):
         except Exception as e:
             # If there's an error, delete the analysis entry
             analysis.delete()
+            # Log the actual error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Analysis failed: {str(e)}")
+            # Return a generic error message to avoid exposing internal details
             return Response(
-                {"error": f"Analysis failed: {str(e)}"},
+                {"error": "Analysis failed. Please try again or contact support."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

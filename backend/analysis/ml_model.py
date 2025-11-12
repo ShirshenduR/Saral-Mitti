@@ -76,8 +76,13 @@ def predict_disease(image_path):
         return result
         
     except Exception as e:
+        # Log the actual error for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error during prediction: {str(e)}")
+        # Return a generic error without exposing internal details
         return {
-            "error": f"Error during prediction: {str(e)}",
+            "error": "Prediction error occurred. Please try again.",
             "disease": "Unknown",
             "confidence": 0.0
         }
