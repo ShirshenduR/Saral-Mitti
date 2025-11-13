@@ -1,0 +1,142 @@
+/* 
+ * Saral Mitti Global Styles
+ * सरल मिट्टी वैश्विक स्टाइल
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========================================
+ * CSS VARIABLES - Light Mode
+ * CSS चर - लाइट मोड
+ * ======================================== */
+:root {
+  /* Background colors - पृष्ठभूमि रंग */
+  --color-bg: #F4E9D8;           /* Warm sand - गर्म रेत */
+  --color-surface: #FFFFFF;       /* Pure white - शुद्ध सफेद */
+  
+  /* Text colors - पाठ रंग */
+  --color-text: #1F2937;          /* Dark gray - गहरा भूरा */
+  --color-muted: #6B7280;         /* Medium gray - मध्यम भूरा */
+  
+  /* Accent colors - एक्सेंट रंग */
+  --color-accent: #0F9D58;        /* Green - हरा */
+  --color-accent-2: #34A853;      /* Light green - हल्का हरा */
+}
+
+/* ========================================
+ * CSS VARIABLES - Dark Mode
+ * CSS चर - डार्क मोड
+ * ======================================== */
+.dark {
+  /* Background colors - पृष्ठभूमि रंग */
+  --color-bg: #0B0B0D;            /* Deep soil - गहरी मिट्टी */
+  --color-surface: #1A1A1C;       /* Raised surface - उठी सतह */
+  
+  /* Text colors - पाठ रंग */
+  --color-text: #E6EDF3;          /* Light gray - हल्का भूरा */
+  --color-muted: #9CA3AF;         /* Medium gray - मध्यम भूरा */
+  
+  /* Accent colors - एक्सेंट रंग */
+  --color-accent: #4EE07A;        /* Neon green - नियॉन हरा */
+  --color-accent-2: #6FE89C;      /* Bright green - चमकीला हरा */
+}
+
+/* ========================================
+ * BASE STYLES
+ * बेस स्टाइल
+ * ======================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+               'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+ * CUSTOM UTILITIES
+ * कस्टम उपयोगिताएँ
+ * ======================================== */
+
+/* Screen reader only - केवल स्क्रीन रीडर */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible styles - फोकस दृश्यमान स्टाइल */
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Custom scrollbar - कस्टम स्क्रॉलबार */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* ========================================
+ * COMPONENT HELPERS
+ * घटक सहायक
+ * ======================================== */
+
+/* Gradient backgrounds - ग्रेडिएंट पृष्ठभूमि */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
+}
+
+/* Glass effect - ग्लास प्रभाव */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
