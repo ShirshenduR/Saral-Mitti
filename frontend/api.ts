@@ -41,10 +41,32 @@ function getAuthToken(): string | null {
 // ========================================
 // TYPE DEFINITIONS - प्रकार परिभाषाएं
 // ========================================
+
+// Farmer context collected from questionnaire
+export interface FarmerContext {
+  state: string;
+  district: string;
+  town: string;
+  village?: string;
+  waterSource: 'river' | 'borewell' | 'canal' | 'rainwater' | 'pond' | 'other';
+  waterSourceDetails?: string;
+  last3Crops: string[];
+  currentCrop?: string;
+  plannedCrop?: string;
+  yieldTrend: 'increasing' | 'stable' | 'decreasing' | 'first-time';
+  yieldDetails?: string;
+  testReason: 'routine' | 'low-yield' | 'disease' | 'new-crop' | 'other';
+  testReasonDetails?: string;
+  recentFertilizers: string[];
+  recentPesticides: string[];
+  season: 'kharif' | 'rabi' | 'zaid' | 'summer';
+}
+
 export interface UploadMetadata {
   location?: string;
   previousCrop?: string;
   irrigationType?: 'rain' | 'canal' | 'borewell';
+  farmerContext?: FarmerContext;
   [key: string]: any;
 }
 
@@ -316,7 +338,7 @@ function getMockResult(id: string): AnalysisResult {
         suitability: 88 + Math.random() * 10,
         expectedYield: 35 + Math.random() * 10,
         growthPeriod: 120,
-        waterNeeds: 'medium',
+        waterNeeds: 'medium' as const,
         icon: '🌾',
       },
       {
@@ -325,7 +347,7 @@ function getMockResult(id: string): AnalysisResult {
         suitability: 75 + Math.random() * 15,
         expectedYield: 40 + Math.random() * 15,
         growthPeriod: 150,
-        waterNeeds: 'high',
+        waterNeeds: 'high' as const,
         icon: '🌾',
       },
       {
@@ -334,7 +356,7 @@ function getMockResult(id: string): AnalysisResult {
         suitability: 70 + Math.random() * 15,
         expectedYield: 15 + Math.random() * 8,
         growthPeriod: 95,
-        waterNeeds: 'low',
+        waterNeeds: 'low' as const,
         icon: '🫘',
       },
       {
@@ -343,7 +365,7 @@ function getMockResult(id: string): AnalysisResult {
         suitability: 65 + Math.random() * 15,
         expectedYield: 25 + Math.random() * 10,
         growthPeriod: 180,
-        waterNeeds: 'medium',
+        waterNeeds: 'medium' as const,
         icon: '🌱',
       },
     ].sort((a, b) => b.suitability - a.suitability).slice(0, 3),

@@ -39,8 +39,8 @@
   --color-muted: #9CA3AF;         /* Medium gray - मध्यम भूरा */
   
   /* Accent colors - एक्सेंट रंग */
-  --color-accent: #4EE07A;        /* Neon green - नियॉन हरा */
-  --color-accent-2: #6FE89C;      /* Bright green - चमकीला हरा */
+  --color-accent: #2D9F5C;        /* Darker green - गहरा हरा */
+  --color-accent-2: #3DB56E;      /* Medium green - मध्यम हरा */
 }
 
 /* ========================================

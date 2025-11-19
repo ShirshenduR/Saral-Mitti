@@ -35,12 +35,13 @@ import {
   type SoilAnalysis,
   type CropRecommendation
 } from './api';
+import type { FarmerContext } from './FarmerQuestionnaire';
 
 // ========================================
 // THEME TYPES & CONFIGURATION
 // थीम प्रकार और कॉन्फ़िगरेशन
 // ========================================
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark';
 
 const THEME_STORAGE_KEY = 'saral-mitti-theme';
 
@@ -48,64 +49,40 @@ const THEME_STORAGE_KEY = 'saral-mitti-theme';
 // THEME HOOK - थीम हुक
 // ========================================
 /**
- * Custom hook for theme management with system preference detection
- * सिस्टम वरीयता पहचान के साथ थीम प्रबंधन के लिए कस्टम हुक
+ * Custom hook for theme management
+ * थीम प्रबंधन के लिए कस्टम हुक
  */
 function useTheme() {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
     // Read saved preference / सहेजी गई वरीयता पढ़ें
     const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-    if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
+    if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
       setThemeState(savedTheme);
-    }
-
-    // Detect system preference / सिस्टम वरीयता का पता लगाएं
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const updateResolvedTheme = (themeValue: Theme = savedTheme || 'system') => {
-      const isDark = themeValue === 'dark' || (themeValue === 'system' && mediaQuery.matches);
-      setResolvedTheme(isDark ? 'dark' : 'light');
       
       // Apply to document / दस्तावेज़ पर लागू करें
-      if (isDark) {
+      if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
-    };
-
-    updateResolvedTheme();
-
-    // Listen for system preference changes / सिस्टम वरीयता परिवर्तनों को सुनें
-    const listener = (e: MediaQueryListEvent) => {
-      if (theme === 'system') {
-        updateResolvedTheme('system');
-      }
-    };
-    mediaQuery.addEventListener('change', listener);
-
-    return () => mediaQuery.removeEventListener('change', listener);
-  }, [theme]);
+    }
+  }, []);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
     localStorage.setItem(THEME_STORAGE_KEY, newTheme);
     
     // Immediately apply / तुरंत लागू करें
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const isDark = newTheme === 'dark' || (newTheme === 'system' && mediaQuery.matches);
-    setResolvedTheme(isDark ? 'dark' : 'light');
-    
-    if (isDark) {
+    if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
   }, []);
 
-  return { theme, setTheme, resolvedTheme };
+  return { theme, setTheme };
 }
 
 // ========================================
@@ -144,10 +121,11 @@ const scaleIn = {
 // ========================================
 interface CaptureAndAnalyzeProps {
   onLogout?: () => void;
+  farmerContext?: FarmerContext | null;
 }
 
-export default function CaptureAndAnalyze({ onLogout }: CaptureAndAnalyzeProps = {}) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+export default function CaptureAndAnalyze({ onLogout, farmerContext }: CaptureAndAnalyzeProps = {}) {
+  const { theme, setTheme } = useTheme();
   const prefersReducedMotion = useReducedMotion();
   const [lang, setLang] = useState<Language>('en');
   const t = strings[lang];
@@ -271,10 +249,17 @@ export default function CaptureAndAnalyze({ onLogout }: CaptureAndAnalyzeProps =
 
       // Upload / अपलोड करें
       setStatusMessage(t.uploadUploading);
+      
+      // Merge farmer context with metadata
+      const enrichedMetadata = {
+        ...metadata,
+        farmerContext: farmerContext || undefined
+      };
+      
       const uploadResponse = await uploadImage(
         file,
         'soil',
-        metadata,
+        enrichedMetadata,
         (progress) => setUploadProgress(progress)
       );
 
@@ -333,31 +318,45 @@ export default function CaptureAndAnalyze({ onLogout }: CaptureAndAnalyzeProps =
   const ThemeToggle = () => {
     const [announceMessage, setAnnounceMessage] = useState('');
 
-    const cycleTheme = () => {
-      const themes: Theme[] = ['light', 'dark', 'system'];
-      const currentIndex = themes.indexOf(theme);
-      const nextTheme = themes[(currentIndex + 1) % themes.length];
+    const toggleTheme = () => {
+      const nextTheme = theme === 'light' ? 'dark' : 'light';
       setTheme(nextTheme);
       
       // Announce for screen readers / स्क्रीन रीडर्स के लिए घोषणा करें
-      const themeLabel = nextTheme === 'light' ? t.themeLight : 
-                        nextTheme === 'dark' ? t.themeDark : t.themeSystem;
+      const themeLabel = nextTheme === 'light' ? t.themeLight : t.themeDark;
       setAnnounceMessage(`${t.themeChanged} ${themeLabel}`);
     };
-
-    const Icon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
 
     return (
       <>
         <button
-          onClick={cycleTheme}
+          onClick={toggleTheme}
           aria-label={t.themeToggleLabel}
-          aria-pressed={theme !== 'system'}
+          aria-pressed={theme === 'dark'}
           className="p-2 rounded-lg bg-surface hover:bg-surface/80 border border-muted 
                      transition-all duration-200 hover:scale-105 focus:outline-none 
                      focus:ring-2 focus:ring-accent"
         >
-          <Icon className="w-5 h-5 text-text" />
+          {theme === 'light' ? (
+            <svg
+              className="w-5 h-5 text-text stroke-current fill-none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          ) : (
+            <svg
+              className="w-5 h-5 text-text fill-current"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          )}
         </button>
         <div 
           role="status" 
@@ -389,6 +388,11 @@ export default function CaptureAndAnalyze({ onLogout }: CaptureAndAnalyzeProps =
             <div>
               <h1 className="text-xl font-bold">{t.appName}</h1>
               <p className="text-xs text-muted">{t.tagline}</p>
+              {farmerContext && (
+                <p className="text-xs text-accent mt-0.5">
+                  📍 {farmerContext.district}, {farmerContext.state} • {farmerContext.season}
+                </p>
+              )}
             </div>
           </div>
           
